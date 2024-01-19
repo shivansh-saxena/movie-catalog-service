@@ -27,9 +27,9 @@ public class MovieCatalogResource {
     private WebClient.Builder builder;
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
-        List<Rating> ratings = restTemplate.getForObject("http://localhost:9003/ratingsdata/users/"+userId, UserRating.class).getUserRating();
+        List<Rating> ratings = restTemplate.getForObject("http://ratings-data-service:9003/ratingsdata/users/"+userId, UserRating.class).getUserRating();
         return ratings.stream().map( rating -> {
-                    Movie movie = restTemplate.getForObject("http://localhost:9002/movies/id", Movie.class);
+                    Movie movie = restTemplate.getForObject("http://movie-info-service:9002/movies/id", Movie.class);
 //                    Movie movie = builder.build()
 //                            .get()
 //                            .uri("http://localhost:9002/movies/id")
