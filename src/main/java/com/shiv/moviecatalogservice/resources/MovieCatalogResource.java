@@ -3,6 +3,7 @@ package com.shiv.moviecatalogservice.resources;
 import com.shiv.moviecatalogservice.models.CatalogItem;
 import com.shiv.moviecatalogservice.models.Movie;
 import com.shiv.moviecatalogservice.models.Rating;
+import com.shiv.moviecatalogservice.models.UserRating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +27,15 @@ public class MovieCatalogResource {
     private WebClient.Builder builder;
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
-        List<Rating> ratings = Arrays.asList(
-                new Rating("mov 1",4),
-                new Rating("mov 2",3)
-        );
+        List<Rating> ratings = restTemplate.getForObject("http://localhost:9003/ratingsdata/users/"+userId, UserRating.class).getUserRating();
         return ratings.stream().map( rating -> {
-//                    Movie movie = restTemplate.getForObject("http://localhost:9002/movies/id", Movie.class);
-                    Movie movie = builder.build()
-                            .get()
-                            .uri("http://localhost:9002/movies/id")
-                            .retrieve()
-                            .bodyToMono(Movie.class)
-                            .block();
+                    Movie movie = restTemplate.getForObject("http://localhost:9002/movies/id", Movie.class);
+//                    Movie movie = builder.build()
+//                            .get()
+//                            .uri("http://localhost:9002/movies/id")
+//                            .retrieve()
+//                            .bodyToMono(Movie.class)
+//                            .block();
                     return new CatalogItem(movie.getName(),"part 1", rating.getRating());
                 }).
                 collect(Collectors.toList());
