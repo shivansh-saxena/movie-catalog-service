@@ -32,6 +32,7 @@ public class MovieCatalogResource {
     private RatingInfo ratingInfo;
 
     @RequestMapping("/{userId}")
+//    @HystrixCommand
 //    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
         List<Rating> ratings = ratingInfo.getUserRating(userId);
