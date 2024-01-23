@@ -1,5 +1,6 @@
 package com.shiv.moviecatalogservice.resources;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.shiv.moviecatalogservice.models.CatalogItem;
 import com.shiv.moviecatalogservice.models.Movie;
 import com.shiv.moviecatalogservice.models.Rating;
@@ -12,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +26,11 @@ public class MovieCatalogResource {
     @Autowired
     private WebClient.Builder builder;
     @RequestMapping("/{userId}")
+    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
         List<Rating> ratings = restTemplate.getForObject("http://ratings-data-service:9003/ratingsdata/users/"+userId, UserRating.class).getUserRating();
         return ratings.stream().map( rating -> {
-                    Movie movie = restTemplate.getForObject("http://movie-info-service:9002/movies/id", Movie.class);
+                    Movie movie = restTemplate.getForObject("http://movie-info-service:9002/movies/100", Movie.class);
 //                    Movie movie = builder.build()
 //                            .get()
 //                            .uri("http://localhost:9002/movies/id")
@@ -44,5 +45,10 @@ public class MovieCatalogResource {
 //                new CatalogItem("Transformers","part 1", 4)
 //        );
 
+    }
+    public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId){
+        return Arrays.asList(
+                new CatalogItem("No Movie","Response from fallback",0)
+        );
     }
 }
